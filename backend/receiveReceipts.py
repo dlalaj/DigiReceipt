@@ -3,7 +3,6 @@ from flask import jsonify, request
 
 def receiveReceipts():
 
-
     data = request.json
     merchantID = data.get('merchantID')
     receipt = data.get('receipt')
