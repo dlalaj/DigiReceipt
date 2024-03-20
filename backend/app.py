@@ -7,6 +7,7 @@ from models import db, User
 from sqlalchemy.exc import OperationalError
 
 from dotenv import load_dotenv
+from receiveReceipts import receiveReceipts
 
 # Load all environment variables
 load_dotenv()
@@ -24,6 +25,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Define routes
+app.route('/receiveReceipts', methods=['POST'])(receiveReceipts)
 @app.route('/',methods=['GET'])
 def index():
     # Database connection test here: should print out 'Database connection established successfully' in your shell
