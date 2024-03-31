@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.dialects.postgresql import JSON
 import json
 
 db = SQLAlchemy()
@@ -23,6 +24,6 @@ class Transaction(db.Model):
     transid = db.Column(db.Integer, primary_key=True)
     clientid = db.Column(db.Integer)
     merchantid = db.Column(db.Integer)
-    purchases = db.Column(db.String)
+    purchases = db.Column(JSON)
 
 

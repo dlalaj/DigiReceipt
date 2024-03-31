@@ -4,7 +4,7 @@ import logging
 from flask import Flask, request, jsonify
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import db, DigiReceiptUser
+from models import db, DigiReceiptUser, Transaction
 from sqlalchemy.exc import OperationalError
 
 from dotenv import load_dotenv
@@ -54,7 +54,49 @@ def index():
 @app.route('/signup', methods=['POST'])
 def signup():
     pass
+
+@app.route('/query', methods=['GET'])
+def getRecipt():
+    transactions = Transaction.query.all()
+
+    serialized_transactions = []
+    for trans in transactions:
+        serialized_transactions.append({
+            'transid': trans.transid,
+            'clientid': trans.clientid,
+            'merchantid': trans.merchantid,
+            'purchases': trans.purchases
+        })
+
+    return jsonify(serialized_transactions)
+
+@app.route('/sendreceipt', methods=['POST'])
+def sendRecipt():
+    data = request.json
+    clientid = data.get('clientid')
+    merchantid = data.get('merchantid')
+    purchases = data.get('purchases')
+
+    new_trans = Transaction(clientid=clientid, merchantid=merchantid, purchases=purchases)
+
+    db.session.add(new_trans)
+    db.session.commit()
+
+    return jsonify({'message': 'Transaction created successfully'}), 201
+
+@app.route('/remove-receipts', methods=['POST'])
+def removeReceipts():
+    try:
+        db.session.query(Transaction).delete()
+        db.session.commit()
+        return jsonify({'message': 'Table removed successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
 # BACKEND ROUTES END HERE
+
 
 
 # Run the web server with the database connection established
