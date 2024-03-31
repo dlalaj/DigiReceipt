@@ -62,9 +62,9 @@ def getRecipt():
     serialized_transactions = []
     for trans in transactions:
         serialized_transactions.append({
-            'transid': trans.transid,
-            'clientid': trans.clientid,
-            'merchantid': trans.merchantid,
+            'tid': trans.tid,
+            'cid': trans.cid,
+            'mid': trans.mid,
             'purchases': trans.purchases
         })
 
@@ -73,11 +73,11 @@ def getRecipt():
 @app.route('/sendreceipt', methods=['POST'])
 def sendRecipt():
     data = request.json
-    clientid = data.get('clientid')
-    merchantid = data.get('merchantid')
+    cid = data.get('cid')
+    mid = data.get('mid')
     purchases = data.get('purchases')
 
-    new_trans = Transaction(clientid=clientid, merchantid=merchantid, purchases=purchases)
+    new_trans = Transaction(cid=cid, mid=mid, purchases=purchases)
 
     db.session.add(new_trans)
     db.session.commit()
@@ -89,6 +89,7 @@ def removeReceipts():
     try:
         db.session.query(Transaction).delete()
         db.session.commit()
+        Transaction.__table__.drop(engine)
         return jsonify({'message': 'Table removed successfully'}), 200
     except Exception as e:
         db.session.rollback()

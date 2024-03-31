@@ -21,9 +21,9 @@ class Transaction(db.Model):
 
     __tablename__ = 'Transaction'
 
-    transid = db.Column(db.Integer, primary_key=True)
-    clientid = db.Column(db.Integer)
-    merchantid = db.Column(db.Integer)
+    tid = db.Column(db.Integer, primary_key=True)
+    cid = db.Column(db.Integer)
+    mid = db.Column(db.Integer)
     purchases = db.Column(JSON)
 
 
