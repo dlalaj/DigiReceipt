@@ -2,7 +2,9 @@
 A project built for the 400 level Cybersecurity course (CPEN 442) at UBC
 
 ## Frontend Setup
-Add frontend setup instructons here
+Follow the installation instructions [here](https://flutter.dev/?gad_source=1&gclid=Cj0KCQjw2a6wBhCVARIsABPeH1vYbEcEqSg32x7elmsDfcpha2lXGbhK-wa9UCYa9u3dh7X8fG5hbQ0aApkFEALw_wcB&gclsrc=aw.ds) to get the Flutter SDK and Dart installed on your machine and ensure you also have a simulator available. By default you should be able to run the app on Chrome but you can also look into getting an iOS or Android simulator.
+
+Start your simulator and then run `flutter run` to launch the app, or alternatively `flutter run -d chrome` to run on Chrome.
 
 ## Backend Setup
 The backend of DigiReceipt is built using the Flask framework and runs on top of a PostgreSQL database. Installation instructions for the backend are given below:
