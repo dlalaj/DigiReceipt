@@ -1,11 +1,12 @@
 
-const url = 'http://localhost:5000/receiveReceipts'
+const url = 'http://localhost:5000/sendreceipt'
 
 let array = ['ProductA', 'ProductB']
 const data = {
-    merchantID: 12,
-    receipt: array, 
-    userID: 121212
+	cid: 21,
+    	mid: 12,
+	time: "2021-09-09 15:44:15.817857",
+    	purchases: JSON.stringify(array)
 };
 
 

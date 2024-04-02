@@ -67,6 +67,7 @@ def getRecipt():
             'tid': trans.tid,
             'cid': trans.cid,
             'mid': trans.mid,
+            'time': trans.time,
             'purchases': trans.purchases
         })
 
@@ -77,9 +78,10 @@ def sendRecipt():
     data = request.json
     cid = data.get('cid')
     mid = data.get('mid')
+    time = data.get('time')
     purchases = data.get('purchases')
 
-    new_trans = Transaction(cid=cid, mid=mid, purchases=purchases)
+    new_trans = Transaction(cid=cid, mid=mid, time=time, purchases=purchases)
 
     db.session.add(new_trans)
     db.session.commit()
