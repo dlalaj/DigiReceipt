@@ -17,12 +17,13 @@ brew install postgresql
 brew services start postgresql@V
 ```
 
-Now we prepare our database for our application like shown below. You need to create a .env file under the `/backend` directory. You can set your environment variables like you want but for ease I recommend you use the following:
+Now we prepare our database for our application like shown below. You need to create a .env file under the `/backend` directory. You can set your environment variables like you want but for ease I recommend you use the following. During deployment, the JWT_SECRET_KEY ought to be set to something secure.
 
 ```
 DB_USERNAME = 'caesar'
 DB_PASSWORD = 'caesar'
 DB_NAME = 'digireceipt'
+JWT_SECRET_KEY = 'secretJWTtoken''
 ```
 
 Now connect to PSQL from a command line and create the user and database for our application as following. It is important that you use the constants set on your .env file because those are needed to set up the connection to the database from the Flask backend as well.
