@@ -1,5 +1,9 @@
+import 'dart:convert';
+import 'dart:developer';
 import 'package:digi_receipts/auth_api.dart';
+import 'package:digi_receipts/user_page.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -16,16 +20,80 @@ class _LoginPageState extends State<LoginPage> {
     // Call signIn method
     final username = usernameController.text;
     final password = passwordController.text;
-    final authApi = AuthApi(baseUrl: 'YOUR_BACKEND_BASE_URL');
+    final authApi = AuthApi(baseUrl: 'http://localhost:5000');
 
     final result = await authApi.signIn(username, password);
-    // Check if login succeeded and navigate or show error
+
+    if (result == null) {
+            // Display message to indicate that username is taken
+      showDialog(
+        // ignore: use_build_context_synchronously
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.0),
+            ),
+            title: const Text(
+              'Warning',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+                fontSize: 24.0,
+              ),
+            ),
+            content: const Text(
+              'Incorrect password entered!',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 18.0,
+              ),
+            ),
+            actionsPadding: const EdgeInsets.all(16.0),
+            actions: <Widget>[
+              TextButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.red),
+                  foregroundColor: MaterialStateProperty.all(Colors.white),
+                ),
+                child: const Text(
+                  'OK',
+                  style: TextStyle(
+                    fontSize: 18.0,
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      // Check if login succeeded and navigate or show error
+      print("Saving preferences");
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString("username", result["username"]);
+      prefs.setString("token", result["token"]);
+      print("Done saving preferences");
+      // Navigate to new page
+      Navigator.push(
+        // ignore: use_build_context_synchronously
+        context,
+        MaterialPageRoute(builder: (context) => const UserInfoPage()),
+      );
+    }
+
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Sign In')),
+      appBar: AppBar(title: const Text('Sign In')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Center(
@@ -33,12 +101,12 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               TextField(
                 controller: usernameController,
-                decoration: InputDecoration(labelText: 'Username'),
+                decoration: const InputDecoration(labelText: 'Username'),
               ),
               TextField(
                 controller: passwordController,
                 obscureText: true,
-                decoration: InputDecoration(labelText: 'Password'),
+                decoration: const InputDecoration(labelText: 'Password'),
               ),
               Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -48,20 +116,20 @@ class _LoginPageState extends State<LoginPage> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: _signIn,
-                          child: Text('Sign In'),
+                          child: const Text('Sign In'),
                         ),
                       ),
-                      SizedBox(width: 12), // spacing between buttons
+                      const SizedBox(width: 12), // spacing between buttons
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => SignUpPage()),
+                                  builder: (context) => const SignUpPage()),
                             );
                           },
-                          child: Text('Sign Up'),
+                          child: const Text('Sign Up'),
                         ),
                       ),
                     ],
@@ -89,6 +157,8 @@ class HomePage extends StatelessWidget {
 }
 
 class SignUpPage extends StatefulWidget {
+  const SignUpPage({super.key});
+
   @override
   _SignUpPageState createState() => _SignUpPageState();
 }
@@ -97,31 +167,138 @@ class _SignUpPageState extends State<SignUpPage> {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
 
-  void _signUp() async {
-    // Call API to sign up
+  Future<void> _signUp() async {
+    // Call signIn method
+    final username = usernameController.text;
+    final password = passwordController.text;
+    final authApi = AuthApi(baseUrl: 'http://localhost:5000');
+
+    final result = await authApi.signUp(username, password);
+    if(result == null){
+      // Display message to indicate that username is taken
+      showDialog(
+        // ignore: use_build_context_synchronously
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.0),
+            ),
+            title: const Text(
+              'Warning',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+                fontSize: 24.0,
+              ),
+            ),
+            content: const Text(
+              'Username in use!',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 18.0,
+              ),
+            ),
+            actionsPadding: const EdgeInsets.all(16.0),
+            actions: <Widget>[
+              TextButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.red),
+                  foregroundColor: MaterialStateProperty.all(Colors.white),
+                ),
+                child: const Text(
+                  'OK',
+                  style: TextStyle(
+                    fontSize: 18.0,
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }else{
+      // ignore: use_build_context_synchronously
+      showDialog(
+            // ignore: use_build_context_synchronously
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0),
+                ),
+                title: const Text(
+                  'Success',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24.0,
+                  ),
+                ),
+                content: const Text(
+                  'Account created successfully! Continue to login page!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 18.0,
+                  ),
+                ),
+                actionsPadding: const EdgeInsets.all(16.0),
+                actions: <Widget>[
+                  TextButton(
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(Colors.green),
+                      foregroundColor: MaterialStateProperty.all(Colors.white),
+                    ),
+                    child: const Text(
+                      'OK',
+                      style: TextStyle(
+                        fontSize: 18.0,
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      // Navigate to the login page
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
               controller: usernameController,
-              decoration: InputDecoration(hintText: 'Username'),
+              decoration: const InputDecoration(hintText: 'Username'),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             TextField(
               controller: passwordController,
-              decoration: InputDecoration(hintText: 'Password'),
+              obscureText: true,
+              decoration: const InputDecoration(hintText: 'Password'),
             ),
-            SizedBox(height: 32),
+            const SizedBox(height: 32),
             ElevatedButton(
               onPressed: _signUp,
-              child: Text('Sign Up'),
+              child: const Text('Sign Up'),
             )
           ],
         ),
