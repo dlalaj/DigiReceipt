@@ -57,6 +57,20 @@ def index():
 def signup():
     pass
 
+@app.route('/remove-receipts', methods=['POST'])
+def removeReceipts():
+    try:
+        db.session.query(Transaction).delete()
+        db.session.commit()
+        Transaction.__table__.drop(engine)
+        return jsonify({'message': 'Table removed successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+# -- Transaction Routes --
+
 @app.route('/query', methods=['GET'])
 def getRecipt():
     transactions = Transaction.query.all()
@@ -73,6 +87,25 @@ def getRecipt():
 
     return jsonify(serialized_transactions)
 
+
+@app.route('/query-user-receipt/<user_cid>', methods=['GET'])
+def getUserReceipt(user_cid):
+    transactions = Transaction.query.all()
+
+    serialized_transactions = []
+    for trans in transactions:
+        if user_cid == trans.cid:
+            serialized_transactions.append({
+            'tid': trans.tid,
+            'cid': trans.cid,
+            'mid': trans.mid,
+            'time': trans.time,
+            'purchases': trans.purchases
+        })
+    
+    return jsonify(serialized_transactions)
+
+
 @app.route('/sendreceipt', methods=['POST'])
 def sendRecipt():
     data = request.json
@@ -87,18 +120,6 @@ def sendRecipt():
     db.session.commit()
 
     return jsonify({'message': 'Transaction created successfully'}), 201
-
-@app.route('/remove-receipts', methods=['POST'])
-def removeReceipts():
-    try:
-        db.session.query(Transaction).delete()
-        db.session.commit()
-        Transaction.__table__.drop(engine)
-        return jsonify({'message': 'Table removed successfully'}), 200
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500
-
 
 # BACKEND ROUTES END HERE
 
