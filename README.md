@@ -28,7 +28,7 @@ DB_NAME = 'digireceipt'
 JWT_SECRET_KEY = 'secretJWTtoken''
 ```
 
-Now connect to PSQL from a command line and create the user and database for our application as following. It is important that you use the constants set on your .env file because those are needed to set up the connection to the database from the Flask backend as well.
+Now connect to PSQL from a command line by entering `psql -U <DB_USERNAME> -d <DB_NAME>` and create the user and database for our application as following. It is important that you use the constants set on your .env file because those are needed to set up the connection to the database from the Flask backend as well.
 
 ```
 psql postgres
