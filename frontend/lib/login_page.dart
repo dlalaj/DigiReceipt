@@ -1,4 +1,5 @@
-import 'package:digi_receipts/auth_api.dart';
+// import 'package:digi_receipts/pages/auth_api.dart';
+import 'package:digi_receipts/pages/navigator.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
@@ -14,12 +15,20 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _signIn() async {
     // Call signIn method
-    final username = usernameController.text;
-    final password = passwordController.text;
-    final authApi = AuthApi(baseUrl: 'YOUR_BACKEND_BASE_URL');
+    // final username = usernameController.text;
+    // final password = passwordController.text;
+    // final authApi = AuthApi(baseUrl: 'YOUR_BACKEND_BASE_URL');
 
-    final result = await authApi.signIn(username, password);
+    // final result = await authApi.signIn(username, password);
+    var result;
+    result == true;
     // Check if login succeeded and navigate or show error
+    if (result == true) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => NavigatorPage()),
+      );
+    }
   }
 
   @override
@@ -47,7 +56,13 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: _signIn,
+                          onPressed:() {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => NavigatorPage()),
+                            );
+                          },
                           child: Text('Sign In'),
                         ),
                       ),

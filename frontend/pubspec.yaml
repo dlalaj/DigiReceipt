@@ -31,7 +31,10 @@ dependencies:
   flutter:
     sdk: flutter
   shared_preferences: ^2.0.13  
+  flutter_neumorphic: ^3.0.3
   http: ^1.2.1
+  qr_flutter: ^4.1.0
+  flutter_clean_architecture: ^5.0.4
 
 
   # The following adds the Cupertino Icons font to your application.

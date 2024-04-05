@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'login_page.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(DigiReceipt());
 }
 
-class MyApp extends StatelessWidget {
+class DigiReceipt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
