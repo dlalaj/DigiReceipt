@@ -2,6 +2,7 @@ import os
 import logging
 
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, JWTManager
 from sqlalchemy import create_engine
@@ -21,6 +22,7 @@ JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
 
 # Configure Flask app with PostgreSQL database - import table schemas from model file
 app = Flask(__name__)
+CORS(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = DB_URL
 app.config["JWT_SECRET_KEY"] = JWT_SECRET_KEY
 jwt = JWTManager(app)
