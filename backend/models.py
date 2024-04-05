@@ -11,8 +11,8 @@ class DigiReceiptUser(db.Model):
     __tablename__ = 'DigiReceiptUser'
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(50), nullable=False)
-    password = db.Column(db.String(50), nullable=False)
+    username = db.Column(db.String(50), nullable=False, unique=True)
+    password = db.Column(db.String(255), nullable=False)
 
 
 # TODO: Add more models for transactions - need to confirm the schema for this carefully
