@@ -95,6 +95,21 @@ def removeReceipts():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
+@app.route('/query-transaction/<user_tid>', methods=['GET'])
+def getTransaction(user_tid):
+    transactions = Transaction.query.all()
+
+    for trans in transactions:
+        if int(user_tid) == trans.tid:
+            return jsonify({
+                'tid': trans.tid,
+                'cid': trans.cid,
+                'mid': trans.mid,
+                'time': trans.time,
+                'purchases': trans.purchases
+            })
+    
+    return jsonify({'error': f'No transaction with ID {user_tid}'}), 500
 
 # BACKEND ROUTES END HERE
 
