@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import JSON
 import json
+import datetime
 
 db = SQLAlchemy()
 
@@ -22,8 +23,9 @@ class Transaction(db.Model):
     __tablename__ = 'Transaction'
 
     tid = db.Column(db.Integer, primary_key=True)
-    cid = db.Column(db.Integer)
-    mid = db.Column(db.Integer)
+    cid = db.Column(db.String)
+    mid = db.Column(db.String)
+    time = db.Column(db.DateTime, default=datetime.datetime.now)
     purchases = db.Column(JSON)
 
 

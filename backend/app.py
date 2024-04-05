@@ -9,6 +9,7 @@ from models import db, DigiReceiptUser, Transaction
 from sqlalchemy.exc import OperationalError
 
 from dotenv import load_dotenv
+from receiveReceipts import receiveReceipts
 
 # Load all environment variables
 load_dotenv()
@@ -95,35 +96,6 @@ def login():
         })
 
 
-@app.route('/query', methods=['GET'])
-def getRecipt():
-    transactions = Transaction.query.all()
-
-    serialized_transactions = []
-    for trans in transactions:
-        serialized_transactions.append({
-            'tid': trans.tid,
-            'cid': trans.cid,
-            'mid': trans.mid,
-            'purchases': trans.purchases
-        })
-
-    return jsonify(serialized_transactions)
-
-@app.route('/sendreceipt', methods=['POST'])
-def sendRecipt():
-    data = request.json
-    cid = data.get('cid')
-    mid = data.get('mid')
-    purchases = data.get('purchases')
-
-    new_trans = Transaction(cid=cid, mid=mid, purchases=purchases)
-
-    db.session.add(new_trans)
-    db.session.commit()
-
-    return jsonify({'message': 'Transaction created successfully'}), 201
-
 @app.route('/remove-receipts', methods=['POST'])
 def removeReceipts():
     try:
@@ -135,6 +107,58 @@ def removeReceipts():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
+
+# -- Transaction Routes --
+
+@app.route('/query', methods=['GET'])
+def getRecipt():
+    transactions = Transaction.query.all()
+
+    serialized_transactions = []
+    for trans in transactions:
+        serialized_transactions.append({
+            'tid': trans.tid,
+            'cid': trans.cid,
+            'mid': trans.mid,
+            'time': trans.time,
+            'purchases': trans.purchases
+        })
+
+    return jsonify(serialized_transactions)
+
+
+@app.route('/query-user-receipt/<user_cid>', methods=['GET'])
+def getUserReceipt(user_cid):
+    transactions = Transaction.query.all()
+
+    serialized_transactions = []
+    for trans in transactions:
+        if user_cid == trans.cid:
+            serialized_transactions.append({
+            'tid': trans.tid,
+            'cid': trans.cid,
+            'mid': trans.mid,
+            'time': trans.time,
+            'purchases': trans.purchases
+        })
+    
+    return jsonify(serialized_transactions)
+
+
+@app.route('/sendreceipt', methods=['POST'])
+def sendRecipt():
+    data = request.json
+    cid = data.get('cid')
+    mid = data.get('mid')
+    time = data.get('time')
+    purchases = data.get('purchases')
+
+    new_trans = Transaction(cid=cid, mid=mid, time=time, purchases=purchases)
+
+    db.session.add(new_trans)
+    db.session.commit()
+
+    return jsonify({'message': 'Transaction created successfully'}), 201
 
 # BACKEND ROUTES END HERE
 
