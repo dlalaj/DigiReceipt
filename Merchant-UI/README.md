@@ -1,9 +1,19 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
+### Prerequisites
+- Node.js and npm installed
+Make sure you have node js installed
+After that, Do these in this order 
+```
+npm config set legacy-peer-deps true
+rm -rf node_modules 
+rm package-lock.json 
+npm cache clear --force
+npm install
 
-First, run the development server:
-
+```x
+Then, run the development server:
 ```bash
 npm run dev
 # or
