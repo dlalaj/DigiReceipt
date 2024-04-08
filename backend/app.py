@@ -112,19 +112,18 @@ def getTransaction():
     user_tid = request.json.get("tid", None)
     user_cid = request.json.get("cid", None)
 
-    transactions = Transaction.query.all()
-
-    for trans in transactions:
-        if int(user_tid) == trans.tid and user_cid == trans.cid:
-            return jsonify({
-                'tid': trans.tid,
-                'cid': trans.cid,
-                'mid': trans.mid,
-                'time': trans.time,
-                'purchases': trans.purchases
-            })
-
-    return jsonify({'error': f'No transaction with tid: {user_tid} and cid: {user_cid}'}), 500
+    trans = Transaction.query.with_entities(Transaction).filter(Transaction.tid == int(user_tid), Transaction.cid == user_cid).first()
+    
+    if trans:
+        return jsonify({
+            'tid': trans.tid,
+            'cid': trans.cid,
+            'mid': trans.mid,
+            'time': trans.time,
+            'purchases': trans.purchases
+        })
+    else:
+        return jsonify({'error': f'No transaction with tid: {user_tid} and cid: {user_cid}'}), 500
 
 # -- Transaction Routes --
 
@@ -145,14 +144,18 @@ def getRecipt():
     return jsonify(serialized_transactions)
 
 
-@app.route('/query-user-receipt/<user_cid>', methods=['GET'])
-def getUserReceipt(user_cid):
-    transactions = Transaction.query.all()
+@app.route('/query-user-receipt', methods=['POST'])
+def getUserReceipt():
+    user_cid = request.json.get("cid", None)
 
     serialized_transactions = []
+    transactions = Transaction.query.with_entities(Transaction).filter(Transaction.cid == user_cid).all()
+
+    if not transactions:
+        return jsonify({'error': f'No client with cid: {user_cid}'}), 500
+
     for trans in transactions:
-        if user_cid == trans.cid:
-            serialized_transactions.append({
+        serialized_transactions.append({
             'tid': trans.tid,
             'cid': trans.cid,
             'mid': trans.mid,
