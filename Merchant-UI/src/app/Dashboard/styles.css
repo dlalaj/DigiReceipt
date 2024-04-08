@@ -1,0 +1,13 @@
+.container {
+    background-image: url('../../components/image2.jpg');
+    background-size: cover; /* or 'contain' depending on your preference */
+    background-position: center;
+    height: 100vh;
+    background-attachment: fixed;
+  }
+
+#context {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
