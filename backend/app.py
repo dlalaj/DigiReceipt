@@ -107,12 +107,15 @@ def removeReceipts():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-@app.route('/query-transaction/<user_tid>', methods=['GET'])
-def getTransaction(user_tid):
+@app.route('/query-transaction', methods=['POST'])
+def getTransaction():
+    user_tid = request.json.get("tid", None)
+    user_cid = request.json.get("cid", None)
+
     transactions = Transaction.query.all()
 
     for trans in transactions:
-        if int(user_tid) == trans.tid:
+        if int(user_tid) == trans.tid and user_cid == trans.cid:
             return jsonify({
                 'tid': trans.tid,
                 'cid': trans.cid,
@@ -120,8 +123,8 @@ def getTransaction(user_tid):
                 'time': trans.time,
                 'purchases': trans.purchases
             })
-    
-    return jsonify({'error': f'No transaction with ID {user_tid}'}), 500
+
+    return jsonify({'error': f'No transaction with tid: {user_tid} and cid: {user_cid}'}), 500
 
 # -- Transaction Routes --
 
