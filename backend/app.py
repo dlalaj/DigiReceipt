@@ -2,6 +2,7 @@ import os
 import logging
 
 from flask import Flask, request, jsonify
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, JWTManager
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -9,7 +10,6 @@ from models import db, DigiReceiptUser, Transaction
 from sqlalchemy.exc import OperationalError
 
 from dotenv import load_dotenv
-from receiveReceipts import receiveReceipts
 
 # Load all environment variables
 load_dotenv()
@@ -57,44 +57,67 @@ def signup():
     # Get username and password from request
     username = request.json.get("username", None)
     password = request.json.get("password", None)
-    new_user = DigiReceiptUser(username=username, password=password)
-    session.add(new_user)
-    session.commit()
-    access_token = create_access_token(identity=username, expires_delta=False)
-    return jsonify({
-        "status": 201,
-        "username": username,
-        "token": access_token
-    })
 
-@app.route('/login', methods=['GET'])
-@jwt_required()
+    # Check that the user does not already exist
+    if session.query(DigiReceiptUser).filter_by(username=username).first():
+        return jsonify({"error": "Username in use"}), 400
+    else:
+        # Else create new user and hash their password to not store it in plaintext
+        new_user = DigiReceiptUser(username=username, password=generate_password_hash(password))
+        session.add(new_user)
+        session.commit()
+        return jsonify({"username": username}), 201
+
+@app.route('/login', methods=['POST'])
 def login():
     username = request.json.get("username", None)
     password = request.json.get("password", None)
+
     # Query the User table for the user with the specified username
     user = session.query(DigiReceiptUser).filter_by(username=username).first()
 
     if user:
-        if user.password == password:
-            # Password matches
-            return jsonify({
-            "status": 200,
-            "error": "Login successful"
-            })
+        if check_password_hash(user.password, password):
+            # Password hash checking complete - send user token for login session
+            access_token = create_access_token(identity=username, expires_delta=False)
+            return jsonify({"username": username, "token": access_token}), 200
         else:
             # Incorrect password entered
-            return jsonify({
-            "status": 401,
-            "error": "Incorrect password entered"
-            })
+            return jsonify({"error": "Incorrect password entered"}), 401
     else:
         # User not found
-        return jsonify({
-            "status": 404,
-            "error": "User not found"
+        return jsonify({"error": "User not found"}), 404
+
+
+@app.route('/query', methods=['GET'])
+# @jwt_required() # Uncomment this eventually to allow route protection
+def getRecipt():
+    transactions = Transaction.query.all()
+
+    serialized_transactions = []
+    for trans in transactions:
+        serialized_transactions.append({
+            'tid': trans.tid,
+            'cid': trans.cid,
+            'mid': trans.mid,
+            'purchases': trans.purchases
         })
 
+    return jsonify(serialized_transactions)
+
+@app.route('/sendreceipt', methods=['POST'])
+def sendRecipt():
+    data = request.json
+    cid = data.get('cid')
+    mid = data.get('mid')
+    purchases = data.get('purchases')
+
+    new_trans = Transaction(cid=cid, mid=mid, purchases=purchases)
+
+    db.session.add(new_trans)
+    db.session.commit()
+
+    return jsonify({'message': 'Transaction created successfully'}), 201
 
 @app.route('/remove-receipts', methods=['POST'])
 def removeReceipts():
@@ -106,59 +129,6 @@ def removeReceipts():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
-
-
-# -- Transaction Routes --
-
-@app.route('/query', methods=['GET'])
-def getRecipt():
-    transactions = Transaction.query.all()
-
-    serialized_transactions = []
-    for trans in transactions:
-        serialized_transactions.append({
-            'tid': trans.tid,
-            'cid': trans.cid,
-            'mid': trans.mid,
-            'time': trans.time,
-            'purchases': trans.purchases
-        })
-
-    return jsonify(serialized_transactions)
-
-
-@app.route('/query-user-receipt/<user_cid>', methods=['GET'])
-def getUserReceipt(user_cid):
-    transactions = Transaction.query.all()
-
-    serialized_transactions = []
-    for trans in transactions:
-        if user_cid == trans.cid:
-            serialized_transactions.append({
-            'tid': trans.tid,
-            'cid': trans.cid,
-            'mid': trans.mid,
-            'time': trans.time,
-            'purchases': trans.purchases
-        })
-    
-    return jsonify(serialized_transactions)
-
-
-@app.route('/sendreceipt', methods=['POST'])
-def sendRecipt():
-    data = request.json
-    cid = data.get('cid')
-    mid = data.get('mid')
-    time = data.get('time')
-    purchases = data.get('purchases')
-
-    new_trans = Transaction(cid=cid, mid=mid, time=time, purchases=purchases)
-
-    db.session.add(new_trans)
-    db.session.commit()
-
-    return jsonify({'message': 'Transaction created successfully'}), 201
 
 # BACKEND ROUTES END HERE
 
