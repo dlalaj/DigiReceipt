@@ -74,7 +74,7 @@ def signup():
 
         # Else create new user and hash their password to not store it in plaintext
         new_user = DigiReceiptUser(username=username, password=generate_password_hash(password), 
-                                   private_key=get_random_bytes(16))
+                                   private_key=get_random_bytes(KEY_LENGTH))
         session.add(new_user)
         session.commit()
         return jsonify({"username": username}), 201
