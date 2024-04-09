@@ -79,7 +79,11 @@ class _LoginPageState extends State<LoginPage> {
       print("Saving preferences");
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString("username", result["username"]);
+      print(result["username"]);
       prefs.setString("token", result["token"]);
+      print(result["token"]);
+      prefs.setString("cid", result["cid"]);
+      print(result["cid"]);
       print("Done saving preferences");
       // Navigate to new page
       Navigator.push(

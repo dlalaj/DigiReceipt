@@ -91,7 +91,7 @@ def login():
         if check_password_hash(user.password, password):
             # Password hash checking complete - send user token for login session
             access_token = create_access_token(identity=username, expires_delta=False)
-            return jsonify({"username": username, "token": access_token}), 200
+            return jsonify({"username": username, "token": access_token, "cid": str(user.id)}), 200
         else:
             # Incorrect password entered
             return jsonify({"error": "Incorrect password entered"}), 401
@@ -99,10 +99,11 @@ def login():
         # User not found
         return jsonify({"error": "User not found"}), 404
 
-@app.route('/query-transaction', methods=['POST'])
+@app.route('/query-transaction', methods=['GET'])
+# @jwt_required() # Uncomment this eventually to allow route protection
 def getTransaction():
-    user_tid = request.json.get("tid", None)
-    user_cid = request.json.get("cid", None)
+    user_tid = request.args.get("tid")
+    user_cid = request.args.get("cid")
 
     trans = Transaction.query.with_entities(Transaction).filter(Transaction.tid == int(user_tid), Transaction.cid == user_cid).first()
     
@@ -112,8 +113,9 @@ def getTransaction():
             'cid': trans.cid,
             'mid': trans.mid,
             'time': trans.time,
-            'purchases': trans.purchases
-        })
+            'purchases': trans.purchases,
+            "tag": trans.tag
+        }), 200
     else:
         return jsonify({'error': f'No transaction with tid: {user_tid} and cid: {user_cid}'}), 500
 
@@ -135,6 +137,7 @@ def getRecipt():
     return jsonify(serialized_transactions)
 
 @app.route('/query-user-receipt', methods=['POST'])
+# @jwt_required() # Uncomment this eventually to allow route protection
 def getUserReceipt():
     user_cid = request.json.get("cid", None)
 
@@ -155,6 +158,7 @@ def getUserReceipt():
     
     return jsonify(serialized_transactions)
 
+
 @app.route('/sendreceipt', methods=['POST'])
 def sendRecipt():
     data = request.json
@@ -164,20 +168,23 @@ def sendRecipt():
 
     user = session.query(DigiReceiptUser).filter_by(id=cid).first()
 
-    cipher = AES.new(key=user.private_key, mode=AES.MODE_GCM, nonce=get_random_bytes(KEY_LENGTH), mac_len=KEY_LENGTH)
+    if user:
+        cipher = AES.new(key=user.private_key, mode=AES.MODE_GCM, nonce=get_random_bytes(KEY_LENGTH), mac_len=KEY_LENGTH)
 
-    _, receipt_tag = cipher.encrypt_and_digest(json.dumps({
-        "cid": cid,
-        "mid": mid,
-        "purchases": purchases
-    }).encode())
+        _, receipt_tag = cipher.encrypt_and_digest(json.dumps({
+            "cid": cid,
+            "mid": mid,
+            "purchases": purchases
+        }).encode())
 
-    new_trans = Transaction(cid=cid, mid=mid, purchases=purchases, tag=receipt_tag.hex())
+        new_trans = Transaction(cid=cid, mid=mid, purchases=purchases, tag=receipt_tag.hex())
 
-    db.session.add(new_trans)
-    db.session.commit()
+        db.session.add(new_trans)
+        db.session.commit()
 
-    return jsonify({'message': 'Transaction created successfully'}), 201
+        return jsonify({'message': 'Transaction created successfully'}), 201
+    else:
+        return jsonify({'error': 'Incorrect user ID'}), 404
 
 @app.route('/validatereceipt', methods=['POST'])
 def validate():
