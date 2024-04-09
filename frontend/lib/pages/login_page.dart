@@ -21,7 +21,7 @@ class _LoginPageState extends State<LoginPage> {
 
     final username = usernameController.text;
     final password = passwordController.text;
-    final authApi = AuthApi(baseUrl: 'http://localhost:5000');
+    final authApi = AuthApi(baseUrl: 'https://localhost:5000');
 
     final result = await authApi.signIn(username, password);
 
@@ -173,7 +173,7 @@ class _SignUpPageState extends State<SignUpPage> {
     // Call signIn method
     final username = usernameController.text;
     final password = passwordController.text;
-    final authApi = AuthApi(baseUrl: 'http://localhost:5000');
+    final authApi = AuthApi(baseUrl: 'https://localhost:5000');
 
     final result = await authApi.signUp(username, password);
     if(result == null){

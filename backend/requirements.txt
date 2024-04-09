@@ -5,3 +5,4 @@ psycopg2==2.9.1
 python-dotenv==1.0.1
 psycopg2-binary==2.9.9
 flask-jwt-extended==4.6.0
+pycryptodome==3.20.0

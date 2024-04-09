@@ -1,5 +1,6 @@
 import os
 import logging
+import json
 
 from flask import Flask, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -8,6 +9,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import db, DigiReceiptUser, Transaction
 from sqlalchemy.exc import OperationalError
+
+from Crypto.Random import get_random_bytes
+from Crypto.Cipher import AES
+
+import ssl
 
 from dotenv import load_dotenv
 
@@ -18,6 +24,9 @@ PASSWORD = os.getenv('DB_PASSWORD')
 DB_NAME = os.getenv('DB_NAME')
 DB_URL = f"postgresql://{USERNAME}:{PASSWORD}@localhost:5432/{DB_NAME}"
 JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
+CERT_PATH = os.getenv('CERT_PATH')
+KEY_PATH = os.getenv('KEY_PATH')
+KEY_LENGTH = 16
 
 # Configure Flask app with PostgreSQL database - import table schemas from model file
 app = Flask(__name__)
@@ -62,8 +71,10 @@ def signup():
     if session.query(DigiReceiptUser).filter_by(username=username).first():
         return jsonify({"error": "Username in use"}), 400
     else:
+
         # Else create new user and hash their password to not store it in plaintext
-        new_user = DigiReceiptUser(username=username, password=generate_password_hash(password))
+        new_user = DigiReceiptUser(username=username, password=generate_password_hash(password), 
+                                   private_key=get_random_bytes(16))
         session.add(new_user)
         session.commit()
         return jsonify({"username": username}), 201
@@ -117,7 +128,8 @@ def getRecipt():
             'tid': trans.tid,
             'cid': trans.cid,
             'mid': trans.mid,
-            'purchases': trans.purchases
+            'purchases': trans.purchases,
+            'tag': trans.tag
         })
 
     return jsonify(serialized_transactions)
@@ -150,12 +162,39 @@ def sendRecipt():
     mid = data.get('mid')
     purchases = data.get('purchases')
 
-    new_trans = Transaction(cid=cid, mid=mid, purchases=purchases)
+    user = session.query(DigiReceiptUser).filter_by(id=cid).first()
+
+    cipher = AES.new(key=user.private_key, mode=AES.MODE_GCM, nonce=get_random_bytes(KEY_LENGTH), mac_len=KEY_LENGTH)
+
+    _, receipt_tag = cipher.encrypt_and_digest(json.dumps({
+        "cid": cid,
+        "mid": mid,
+        "purchases": purchases
+    }).encode())
+
+    new_trans = Transaction(cid=cid, mid=mid, purchases=purchases, tag=receipt_tag.hex())
 
     db.session.add(new_trans)
     db.session.commit()
 
     return jsonify({'message': 'Transaction created successfully'}), 201
+
+@app.route('/validatereceipt', methods=['POST'])
+def validate():
+    cid = request.json.get("cid", None)
+    tid = request.json.get("tid", None)
+    tag = request.json.get("tag", None)
+
+    transaction = session.query(Transaction).filter_by(tid=tid).first()
+
+    if transaction:
+        if transaction.cid != cid or transaction.tag != tag:
+            return jsonify({"error": "Potional Receipt Fraud"}), 403
+        else:
+            return jsonify({"message": "Receipt validated"}), 200
+    else:
+        return jsonify({"error": "No transaction found"}), 404
+
 
 @app.route('/remove-receipts', methods=['POST'])
 def removeReceipts():
@@ -175,4 +214,6 @@ def removeReceipts():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    context.load_cert_chain(CERT_PATH, KEY_PATH)
+    app.run(host="127.0.0.1", port=5000, debug=True, ssl_context=context)
