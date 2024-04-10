@@ -1,12 +1,19 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
-import 'login_page.dart';
+import 'pages/login_page.dart';
 
 void main() {
-  runApp(MyApp());
+  // This fixes the inability ot use a CA provided certificate - in production this is not safe
+  HttpOverrides.global = DevHttpOverrides();
+  runApp(const DigiReceipt());
 }
 
-class MyApp extends StatelessWidget {
+class DigiReceipt extends StatelessWidget {
+  const DigiReceipt({super.key});
+
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -14,7 +21,14 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: LoginPage(),
+      home: const LoginPage(),
     );
+  }
+}
+class DevHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
   }
 }
