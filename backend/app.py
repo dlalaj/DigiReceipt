@@ -9,7 +9,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, JWTManager
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import db, DigiReceiptUser, Transaction
+from models import db, DigiReceiptUser, Transaction, Merchant
 from sqlalchemy.exc import OperationalError
 
 from Crypto.Random import get_random_bytes
@@ -92,6 +92,28 @@ def signup():
         session.commit()
         return jsonify({"username": username}), 201
 
+@app.route('/addMerchant', methods=['POST'])
+def add_merchant():
+    data = request.get_json()
+    name = data.get('name')
+    
+    # Check if the name is not empty
+    if not name:
+        return jsonify({'error': 'The name is required!'}), 400
+
+    # Instantiate a new Merchant
+    new_merchant = Merchant(name=name)
+
+    # Add the new merchant to the database session and commit
+    db.session.add(new_merchant)
+    try:
+        db.session.commit()
+        return jsonify({'message': f'Merchant {name} added successfully!'}), 201
+    except Exception as e:
+        db.session.rollback()  
+        return jsonify({'error': str(e)}), 500
+    
+    
 @app.route('/login', methods=['POST'])
 def login():
     username = request.json.get("username", None)
@@ -172,6 +194,7 @@ def sendRecipt():
     data = request.json
     cid = data.get('cid')
     mid = data.get('mid')
+    tid = data.get('tid')
     purchases = data.get('purchases')
 
     user = session.query(DigiReceiptUser).filter_by(id=cid).first()

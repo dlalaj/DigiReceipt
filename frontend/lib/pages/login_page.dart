@@ -1,4 +1,3 @@
-
 import 'package:digi_receipts/auth_api.dart';
 import 'package:digi_receipts/pages/navigator.dart';
 
@@ -21,12 +20,12 @@ class _LoginPageState extends State<LoginPage> {
 
     final username = usernameController.text;
     final password = passwordController.text;
-    final authApi = AuthApi(baseUrl: 'https://localhost:5000');
+    final authApi = AuthApi(baseUrl: 'http://10.0.2.2:5000');
 
     final result = await authApi.signIn(username, password);
 
     if (result == null) {
-            // Display message to indicate that username is taken
+      // Display message to indicate that username is taken
       showDialog(
         // ignore: use_build_context_synchronously
         context: context,
@@ -86,13 +85,12 @@ class _LoginPageState extends State<LoginPage> {
       print(result["cid"]);
       print("Done saving preferences");
       // Navigate to new page
-      Navigator.push(
-        // ignore: use_build_context_synchronously
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => NavigatorPage()),
+        (Route<dynamic> route) => false, // Remove all routes below the NavigatorPage
       );
     }
-
   }
 
   @override
@@ -120,7 +118,6 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       Expanded(
                         child: ElevatedButton(
-
                           onPressed: _signIn,
                           child: const Text('Sign In'),
                         ),
@@ -177,10 +174,10 @@ class _SignUpPageState extends State<SignUpPage> {
     // Call signIn method
     final username = usernameController.text;
     final password = passwordController.text;
-    final authApi = AuthApi(baseUrl: 'https://localhost:5000');
+    final authApi = AuthApi(baseUrl: 'http://10.0.2.2:5000');
 
     final result = await authApi.signUp(username, password);
-    if(result == null){
+    if (result == null) {
       // Display message to indicate that username is taken
       showDialog(
         // ignore: use_build_context_synchronously
@@ -229,57 +226,57 @@ class _SignUpPageState extends State<SignUpPage> {
           );
         },
       );
-    }else{
+    } else {
       // ignore: use_build_context_synchronously
       showDialog(
-            // ignore: use_build_context_synchronously
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                backgroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0),
+        // ignore: use_build_context_synchronously
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.0),
+            ),
+            title: const Text(
+              'Success',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.green,
+                fontWeight: FontWeight.bold,
+                fontSize: 24.0,
+              ),
+            ),
+            content: const Text(
+              'Account created successfully! Continue to login page!',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 18.0,
+              ),
+            ),
+            actionsPadding: const EdgeInsets.all(16.0),
+            actions: <Widget>[
+              TextButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.green),
+                  foregroundColor: MaterialStateProperty.all(Colors.white),
                 ),
-                title: const Text(
-                  'Success',
-                  textAlign: TextAlign.center,
+                child: const Text(
+                  'OK',
                   style: TextStyle(
-                    color: Colors.green,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 24.0,
-                  ),
-                ),
-                content: const Text(
-                  'Account created successfully! Continue to login page!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.black,
                     fontSize: 18.0,
                   ),
                 ),
-                actionsPadding: const EdgeInsets.all(16.0),
-                actions: <Widget>[
-                  TextButton(
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(Colors.green),
-                      foregroundColor: MaterialStateProperty.all(Colors.white),
-                    ),
-                    child: const Text(
-                      'OK',
-                      style: TextStyle(
-                        fontSize: 18.0,
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      // Navigate to the login page
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              );
-            },
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  // Navigate to the login page
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
           );
+        },
+      );
     }
   }
 

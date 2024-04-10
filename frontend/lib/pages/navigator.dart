@@ -25,7 +25,7 @@ class _NavigatorPageState extends State<NavigatorPage> {
     return Scaffold(
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.white,
-        showSelectedLabels: false, // Adjust based on your UI needs
+        showSelectedLabels: true, 
         items: [
           BottomNavigationBarItem(
             label: "QR Code",

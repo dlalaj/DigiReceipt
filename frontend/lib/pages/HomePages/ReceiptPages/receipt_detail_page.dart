@@ -11,7 +11,7 @@ class ReceiptDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(receipt.title),
+        title: Text(receipt.purchases.title),
         backgroundColor: const Color.fromARGB(255, 255, 255, 255), 
       ),
       body: SingleChildScrollView(
@@ -44,7 +44,7 @@ class ReceiptDetailPage extends StatelessWidget {
                   ),
                 ],
               ),
-              ...receipt.items.map((item) => Padding(
+              ...receipt.purchases.items.map((item) => Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -66,7 +66,7 @@ class ReceiptDetailPage extends StatelessWidget {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    '${receipt.totalBeforeTax.toStringAsFixed(2)} CAD',
+                    '${receipt.purchases.totalBeforeTax.toStringAsFixed(2)} CAD',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -79,7 +79,7 @@ class ReceiptDetailPage extends StatelessWidget {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    '${receipt.gstTotal.toStringAsFixed(2)} CAD',
+                    '${receipt.purchases.gstTotal.toStringAsFixed(2)} CAD',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -92,7 +92,7 @@ class ReceiptDetailPage extends StatelessWidget {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    '${receipt.pstTotal.toStringAsFixed(2)} CAD',
+                    '${receipt.purchases.pstTotal.toStringAsFixed(2)} CAD',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -106,7 +106,7 @@ class ReceiptDetailPage extends StatelessWidget {
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    '${receipt.total.toStringAsFixed(2)} CAD',
+                    '${receipt.purchases.total.toStringAsFixed(2)} CAD',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -114,7 +114,7 @@ class ReceiptDetailPage extends StatelessWidget {
               SizedBox(height: 24),
               Center(
                 child: QrImageView(
-                  data: receipt.qrCodeData,
+                  data: receipt.purchases.qrCodeData,
                   version: QrVersions.auto,
                   size: 200.0,
                 ),
