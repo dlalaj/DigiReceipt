@@ -30,11 +30,19 @@ class _QRCodePageState extends State<QRCodePage> {
     });
   }
 
+  Future<void> setQR() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      qrData = prefs.getString('cid') ?? '';
+    });
+  }
+
   void getCurrentDate() {
     // Get current date and format it
     currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
   }
-  
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,7 +65,7 @@ class _QRCodePageState extends State<QRCodePage> {
             ElevatedButton(
               onPressed: () {
                 setState(() {
-                  qrData = 'TESTDATA'; // Set QR code data
+                  setQR(); // Set QR code data
                 });
               },
               child: const Text('Generate QR Code'),
