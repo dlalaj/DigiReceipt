@@ -20,7 +20,7 @@ class _LoginPageState extends State<LoginPage> {
 
     final username = usernameController.text;
     final password = passwordController.text;
-    final authApi = AuthApi(baseUrl: 'http://10.0.2.2:5000');
+    final authApi = AuthApi(baseUrl: 'https://10.0.2.2:5000');
 
     final result = await authApi.signIn(username, password);
 
@@ -78,7 +78,11 @@ class _LoginPageState extends State<LoginPage> {
       print("Saving preferences");
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString("username", result["username"]);
+      print(result["username"]);
       prefs.setString("token", result["token"]);
+      print(result["token"]);
+      prefs.setString("cid", result["cid"]);
+      print(result["cid"]);
       print("Done saving preferences");
       // Navigate to new page
       Navigator.pushAndRemoveUntil(
@@ -170,7 +174,7 @@ class _SignUpPageState extends State<SignUpPage> {
     // Call signIn method
     final username = usernameController.text;
     final password = passwordController.text;
-    final authApi = AuthApi(baseUrl: 'http://10.0.2.2:5000');
+    final authApi = AuthApi(baseUrl: 'https://10.0.2.2:5000');
 
     final result = await authApi.signUp(username, password);
     if (result == null) {
