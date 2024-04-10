@@ -1,6 +1,7 @@
 import os
 import logging
 import json
+import time
 
 from flask import Flask, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -27,6 +28,8 @@ JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
 CERT_PATH = os.getenv('CERT_PATH')
 KEY_PATH = os.getenv('KEY_PATH')
 KEY_LENGTH = 16
+EXPIRY_TIME = 180
+NONCE = b'noncenoncenoncen'
 
 # Configure Flask app with PostgreSQL database - import table schemas from model file
 app = Flask(__name__)
@@ -47,6 +50,14 @@ logger = logging.getLogger(__name__)
 # Define all API routes starting below. To ensure confidentiality we use JWT, for each route that 
 # needs to be protected because it serves secret resources make sure to use the decorator:
 # @jwt_required() so as to only allow users who provide a bearer token
+
+def _refreshUserKey(user, db):
+    user.private_key = get_random_bytes(KEY_LENGTH)
+    db.session.commit()
+
+def _setTransExpiry(trans, db):
+    trans.expiry_time = int(time.time()) + EXPIRY_TIME
+    db.session.commit()
 
 # BACKEND ROUTES START HERE
 @app.route('/',methods=['GET'])
@@ -105,7 +116,16 @@ def getTransaction():
     user_tid = request.args.get("tid")
     user_cid = request.args.get("cid")
 
+    user = session.query(DigiReceiptUser).filter_by(id=user_cid).first()
     trans = Transaction.query.with_entities(Transaction).filter(Transaction.tid == int(user_tid), Transaction.cid == user_cid).first()
+
+    cipher = AES.new(key=user.private_key, mode=AES.MODE_GCM, nonce=get_random_bytes(KEY_LENGTH), mac_len=KEY_LENGTH)
+
+    _, receipt_tag = cipher.encrypt_and_digest(json.dumps({
+        "cid": cid,
+        "mid": mid,
+        "purchases": purchases
+    }).encode())
     
     if trans:
         return jsonify({
@@ -142,17 +162,27 @@ def getUserReceipt():
     user_cid = request.json.get("cid", None)
 
     serialized_transactions = []
+    user = session.query(DigiReceiptUser).filter_by(id=user_cid).first()
     transactions = Transaction.query.with_entities(Transaction).filter(Transaction.cid == user_cid).all()
 
     if not transactions:
         return jsonify({'error': f'No client with cid: {user_cid}'}), 500
+    
+    _refreshUserKey(user, db)
 
     for trans in transactions:
+        # Check if expired user.private_key
+        _setTransExpiry(trans, db)
+
+        cipher = AES.new(key=user.private_key, mode=AES.MODE_GCM, nonce=NONCE, mac_len=KEY_LENGTH)
+
+        ciphertext, _ = cipher.encrypt_and_digest(str(trans.tid).encode())
+
         serialized_transactions.append({
-            'tid': trans.tid,
             'cid': trans.cid,
             'mid': trans.mid,
             'time': trans.time,
+            'qrdata': ciphertext.hex(),
             'purchases': trans.purchases
         })
     
@@ -169,15 +199,9 @@ def sendRecipt():
     user = session.query(DigiReceiptUser).filter_by(id=cid).first()
 
     if user:
-        cipher = AES.new(key=user.private_key, mode=AES.MODE_GCM, nonce=get_random_bytes(KEY_LENGTH), mac_len=KEY_LENGTH)
 
-        _, receipt_tag = cipher.encrypt_and_digest(json.dumps({
-            "cid": cid,
-            "mid": mid,
-            "purchases": purchases
-        }).encode())
 
-        new_trans = Transaction(cid=cid, mid=mid, purchases=purchases, tag=receipt_tag.hex())
+        new_trans = Transaction(cid=cid, mid=mid, purchases=purchases)
 
         db.session.add(new_trans)
         db.session.commit()
@@ -189,18 +213,26 @@ def sendRecipt():
 @app.route('/validatereceipt', methods=['POST'])
 def validate():
     cid = request.json.get("cid", None)
-    tid = request.json.get("tid", None)
-    tag = request.json.get("tag", None)
+    #tid = request.json.get("tid", None)
+    qrdata = request.json.get("qrdata", None)
 
-    transaction = session.query(Transaction).filter_by(tid=tid).first()
+    user = session.query(DigiReceiptUser).filter_by(id=cid).first()
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    if transaction.expiry_time < int(time.time()):
+        return jsonify({"error": "Potential Receipt Fraud (QR Expired)"}), 403
+
+    cipher = AES.new(key=user.private_key, mode=AES.MODE_GCM, nonce=NONCE, mac_len=KEY_LENGTH)
+
+    user_tid = cipher.decrypt(bytes.fromhex(qrdata))
+
+    transaction = session.query(Transaction).filter_by(tid=int(user_tid)).first()
 
     if transaction:
-        if transaction.cid != cid or transaction.tag != tag:
-            return jsonify({"error": "Potional Receipt Fraud"}), 403
-        else:
-            return jsonify({"message": "Receipt validated"}), 200
+        return jsonify({"message": "Receipt validated"}), 200
     else:
-        return jsonify({"error": "No transaction found"}), 404
+        return jsonify({"error": "Potential Receipt Fraud (Invalid transaction ID)"}), 403
 
 
 @app.route('/remove-receipts', methods=['POST'])

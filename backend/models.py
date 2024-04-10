@@ -23,4 +23,4 @@ class Transaction(db.Model):
     mid = db.Column(db.String)
     time = db.Column(db.DateTime, default=datetime.datetime.now)
     purchases = db.Column(JSON)
-    tag = db.Column(db.String)
+    expiry_time = db.Column(db.Integer)
