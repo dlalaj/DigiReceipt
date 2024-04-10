@@ -45,8 +45,8 @@ class _ReceiptsViewState extends fca.ViewState<ReceiptsView, ReceiptsController>
                     },
                     child: Card(
                       child: ListTile(
-                        title: Text(receipt.title), // Display the receipt title
-                        subtitle: Text('Total: ${receipt.total.toStringAsFixed(2)}'), // Display the total amount
+                        title: Text(receipt.merchantName), // Display the receipt title
+                        subtitle: Text('Total: ${receipt.purchases.total.toStringAsFixed(2)}'), // Display the total amount
                         // You can add more properties here, like date or ID
                       ),
                     ),

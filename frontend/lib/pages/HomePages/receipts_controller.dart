@@ -1,103 +1,63 @@
 import 'dart:async';
-import 'dart:convert';
+import 'package:digi_receipts/auth_api.dart';
 import 'package:flutter_clean_architecture/flutter_clean_architecture.dart';
 
 class ReceiptsController extends Controller {
   final StreamController<List<Receipt>> _receiptsController = StreamController<List<Receipt>>.broadcast();
-
+  final AuthApi _authApi = AuthApi(baseUrl: 'http://10.0.2.2:5000');
+  
   Stream<List<Receipt>> get receiptsStream => _receiptsController.stream;
 
   ReceiptsController() {
-    // Simulate loading receipts from a data source
     _loadReceipts();
   }
 
-void _loadReceipts() async {
-  await Future.delayed(Duration(seconds: 1));
-
-  // TODO - Hard coded data, fectch from the api
-  String jsonData = '''
-  [
-    {
-      "id": "R123456789",
-      "title": "Retail Purchase",
-      "items": [
-        {
-          "name": "High Waist Jeans - Original",
-          "price": 24.99,
-          "quantity": 1,
-          "gstAmount": 1.25,
-          "pstAmount": 1.75,
-          "totalTax": 3.00
-        },
-        {
-          "name": "Cotton T-Shirt - Basic Black",
-          "price": 19.99,
-          "quantity": 1,
-          "gstAmount": 1.00,
-          "pstAmount": 1.40,
-          "totalTax": 2.40
-        }
-      ],
-      "totalBeforeTax": 44.98,
-      "gstTotal": 2.25,
-      "pstTotal": 3.15,
-      "totalTax": 5.40,
-      "total": 50.38,
-      "qrCodeData": "https://example.com/receipt/R123456789"
-    },
-    {
-      "id": "R987654321",
-      "title": "Electronics Purchase",
-      "items": [
-        {
-          "name": "Wireless Mouse",
-          "price": 29.99,
-          "quantity": 1,
-          "gstAmount": 1.50,
-          "pstAmount": 2.10,
-          "totalTax": 3.60
-        },
-        {
-          "name": "USB Keyboard",
-          "price": 49.99,
-          "quantity": 1,
-          "gstAmount": 2.50,
-          "pstAmount": 3.50,
-          "totalTax": 6.00
-        }
-      ],
-      "totalBeforeTax": 79.98,
-      "gstTotal": 4.00,
-      "pstTotal": 5.60,
-      "totalTax": 9.60,
-      "total": 89.58,
-      "qrCodeData": "https://example.com/receipt/R987654321"
+  void _loadReceipts() async {
+    var jsonResponse = await _authApi.fetchReceipts();
+    if (jsonResponse != null) {
+      List<Receipt> receipts = List<Receipt>.from(jsonResponse.map((model) => Receipt.fromJson(model)));
+      _receiptsController.add(receipts);
+    } else {
+      // Handle the error or empty case
+      _receiptsController.add([]);
     }
-  ]
-
-  ''';
-
-  // Parse the JSON data
-  List<dynamic> jsonResponse = json.decode(jsonData);
-
-  // Convert the JSON to a list of Receipts
-  List<Receipt> receipts = jsonResponse.map((data) => Receipt.fromJson(data)).toList();
-
-  // Update your controller with the list of receipts
-  _receiptsController.add(receipts);
-}
+  }
 
   @override
-  void initListeners() {}
+  void initListeners() {
+    // Your existing listener initialization
+  }
+}
+class Receipt {
+  final int cid;
+  final String merchantName;
+  final int mid;
+  final int tid;
+  final String time;
+  final PurchaseDetails purchases;
 
+  Receipt({
+    required this.cid,
+    required this.merchantName,
+    required this.mid,
+    required this.tid,
+    required this.time,
+    required this.purchases,
+  });
+
+  factory Receipt.fromJson(Map<String, dynamic> json) {
+    return Receipt(
+      cid: json['cid'],
+      merchantName: json['merchantName'],
+      mid: json['mid'],
+      tid: json['tid'],
+      time: json['time'],
+      purchases: PurchaseDetails.fromJson(json['purchases']),
+    );
+  }
 }
 
-
-
-
-class Receipt {
-  final String id;
+class PurchaseDetails {
   final String title;
   final List<Item> items;
   final double totalBeforeTax;
@@ -107,8 +67,7 @@ class Receipt {
   final double total;
   final String qrCodeData;
 
-  Receipt({
-    required this.id,
+  PurchaseDetails({
     required this.title,
     required this.items,
     required this.totalBeforeTax,
@@ -119,12 +78,11 @@ class Receipt {
     required this.qrCodeData,
   });
 
-  factory Receipt.fromJson(Map<String, dynamic> json) {
+  factory PurchaseDetails.fromJson(Map<String, dynamic> json) {
     var itemsFromJson = json['items'] as List<dynamic>;
     List<Item> itemsList = itemsFromJson.map((itemJson) => Item.fromJson(itemJson)).toList();
 
-    return Receipt(
-      id: json['id'],
+    return PurchaseDetails(
       title: json['title'],
       items: itemsList,
       totalBeforeTax: json['totalBeforeTax'],

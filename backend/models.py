@@ -29,3 +29,8 @@ class Transaction(db.Model):
     purchases = db.Column(JSON)
 
 
+class Merchant(db.Model):
+    __tablename__ = 'Merchant'  # Make sure this matches your actual table name in the database
+
+    id = db.Column(db.BigInteger, primary_key=True)
+    name = db.Column(db.Text, nullable=False) 

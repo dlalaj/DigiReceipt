@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, JWTManager
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import db, DigiReceiptUser, Transaction
+from models import db, DigiReceiptUser, Transaction, Merchant
 from sqlalchemy.exc import OperationalError
 
 from dotenv import load_dotenv
@@ -68,6 +68,28 @@ def signup():
         session.commit()
         return jsonify({"username": username}), 201
 
+@app.route('/addMerchant', methods=['POST'])
+def add_merchant():
+    data = request.get_json()
+    name = data.get('name')
+    
+    # Check if the name is not empty
+    if not name:
+        return jsonify({'error': 'The name is required!'}), 400
+
+    # Instantiate a new Merchant
+    new_merchant = Merchant(name=name)
+
+    # Add the new merchant to the database session and commit
+    db.session.add(new_merchant)
+    try:
+        db.session.commit()
+        return jsonify({'message': f'Merchant {name} added successfully!'}), 201
+    except Exception as e:
+        db.session.rollback()  
+        return jsonify({'error': str(e)}), 500
+    
+    
 @app.route('/login', methods=['POST'])
 def login():
     username = request.json.get("username", None)
@@ -80,7 +102,7 @@ def login():
         if check_password_hash(user.password, password):
             # Password hash checking complete - send user token for login session
             access_token = create_access_token(identity=username, expires_delta=False)
-            return jsonify({"username": username, "token": access_token}), 200
+            return jsonify({"username": username, "token": access_token, "userId": 1}), 200 #TODO update userId dynamically
         else:
             # Incorrect password entered
             return jsonify({"error": "Incorrect password entered"}), 401
@@ -127,17 +149,21 @@ def getUserReceipt():
     user_cid = request.json.get("cid", None)
 
     serialized_transactions = []
-    transactions = Transaction.query.with_entities(Transaction).filter(Transaction.cid == user_cid).all()
+    transactions = (db.session.query(Transaction)
+                    .filter(Transaction.cid == user_cid)
+                    .all())
+
 
     if not transactions:
         return jsonify({'error': f'No client with cid: {user_cid}'}), 500
 
-    for trans in transactions:
+    for trans  in transactions:
         serialized_transactions.append({
             'tid': trans.tid,
             'cid': trans.cid,
             'mid': trans.mid,
             'time': trans.time,
+            'merchantName': "Store442",
             'purchases': trans.purchases
         })
     
@@ -148,6 +174,7 @@ def sendRecipt():
     data = request.json
     cid = data.get('cid')
     mid = data.get('mid')
+    tid = data.get('tid')
     purchases = data.get('purchases')
 
     new_trans = Transaction(cid=cid, mid=mid, purchases=purchases)
