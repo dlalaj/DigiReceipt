@@ -18,7 +18,8 @@ class Transaction(db.Model):
 
     __tablename__ = 'Transaction'
 
-    tid = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    tid = db.Column(db.String)
     cid = db.Column(db.String)
     mid = db.Column(db.String)
     time = db.Column(db.DateTime, default=datetime.datetime.now)
