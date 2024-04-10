@@ -1,9 +1,9 @@
 import 'package:digi_receipts/pages/HomePages/receipts_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:qr_flutter/qr_flutter.dart'; 
+import 'package:qr_flutter/qr_flutter.dart';
 
 class ReceiptDetailPage extends StatelessWidget {
-  final Receipt receipt; 
+  final Receipt receipt;
 
   const ReceiptDetailPage({Key? key, required this.receipt}) : super(key: key);
 
@@ -11,8 +11,8 @@ class ReceiptDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(receipt.purchases.title),
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255), 
+        title: Text(receipt.purchases.merchantName),
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -45,18 +45,18 @@ class ReceiptDetailPage extends StatelessWidget {
                 ],
               ),
               ...receipt.purchases.items.map((item) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('  ${item.quantity}      '),
-                    Expanded(
-                      child: Text(item.name),
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('  ${item.quantity}      '),
+                        Expanded(
+                          child: Text(item.name),
+                        ),
+                        Text('${item.totalPrice} CAD'),
+                      ],
                     ),
-                    Text('${(item.price * item.quantity + item.gstAmount + item.pstAmount).toStringAsFixed(2)} CAD'),
-                  ],
-                ),
-              )),
+                  )),
               Divider(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -114,7 +114,7 @@ class ReceiptDetailPage extends StatelessWidget {
               SizedBox(height: 24),
               Center(
                 child: QrImageView(
-                  data: receipt.purchases.qrCodeData,
+                  data: receipt.qrData,
                   version: QrVersions.auto,
                   size: 200.0,
                 ),
