@@ -11,6 +11,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import db, DigiReceiptUser, Transaction
 from sqlalchemy.exc import OperationalError
+from flask_cors import CORS
 
 from Crypto.Random import get_random_bytes
 from Crypto.Cipher import AES
@@ -35,6 +36,7 @@ NONCE = b'noncenoncenoncen'
 
 # Configure Flask app with PostgreSQL database - import table schemas from model file
 app = Flask(__name__)
+CORS(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = DB_URL
 app.config["JWT_SECRET_KEY"] = JWT_SECRET_KEY
 jwt = JWTManager(app)

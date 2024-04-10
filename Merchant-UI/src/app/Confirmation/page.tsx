@@ -44,7 +44,7 @@ function MyComponent() {
 
 
     function sendReceipts(userID: string, finalSale: any, currentTime: string) {
-        const sendUrl = 'http://localhost:5000/sendreceipt';
+        const sendUrl = 'https://127.0.0.1:5000/sendreceipt';
         const data = {
             cid: Number(userID),
             mid: 12,
