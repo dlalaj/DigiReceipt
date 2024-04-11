@@ -23,71 +23,32 @@ import { ChevronLeft, ChevronRight, Copy, CreditCard, MoreHorizontal, MoreVertic
 import { Separator } from "@/components/ui/separator";
 import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination";
 
-// const items = [
-//   { id: 1, name: "Cyber-chicken", price: 10.99 },
-//   { id: 2, name: "Firewallicious", price: 20.49 },
-//   { id: 3, name: "Hackadoodle", price: 5.99 },
-//   { id: 1, name: "Cyber-chicken", price: 10.99 },
-//   { id: 2, name: "Firewallicious", price: 20.49 },
-//   { id: 3, name: "Hackadoodle", price: 5.99 }
-// ];
+// const obj = {
+//   "id": 3,
+//   "purchases": "{\"items\":[{\"id\":3,\"name\":\"Hackadoodle\",\"price\":5.99,\"totalNumber\":2,\"totalPrice\":11.98}],\"userID\":\"1\",\"merchantID\":12,\"total\":\"13.42\",\"totalTax\":1.44,\"totalBeforeTax\":\"11.98\",\"tax\":5,\"OrderID\":\"hspwlxwscp\",\"time\":\"April 10, 2024\",\"merchantName\":\"CyberSecure Bistro\",\"gstTotal\":0.84,\"pstTotal\":0.6}",
+//   "time": "Wed, 10 Apr 2024 19:08:46 GMT"
+// }
 
-const items = JSON.parse(localStorage.getItem('cart'));
-const orderID = localStorage.getItem("orderID");
-
-let finalSale = [];
-
-let totalAmount = 0;
-
-function checkifExist(finalSale: [{}], checkItem: {}) {
-  for (let i = 0; i < finalSale.length; i++) {
-    let tmp = finalSale[i];
-    if (tmp.id === checkItem.id) {
-      totalAmount += tmp.price;
-      tmp.totalNumber++;
-      tmp.totalPrice += tmp.price;
-      return;
-    }
-  }
-  checkItem['totalNumber'] = 1;
-  totalAmount += checkItem.price;
-  checkItem.totalPrice = checkItem.price;
-  finalSale.push(checkItem);
-
-}
-
-
-
-
-let onetime = 0
-
-
-
-
-
-export default function Home() {
-
-  if (onetime === 0) {
-    onetime++;
-    for (let i = 0; i < items.length; i++) {
-      checkifExist(finalSale, items[i]);
-    }
-  }
-
-
-
-
-
-  const today = new Date();
-
-  // Format the date as "Month DD, YYYY"
-  const formattedDate = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+let onetime = 0;
+export default function Home12({purchase}) {
+  let obj = purchase;
+  purchase = JSON.parse(obj.purchases);
+  console.log(purchase);
+  let orderID = purchase.OrderID;
+  let formattedDate = obj.time;
+  let totalBeforeTax = Number(purchase.totalBeforeTax);
+  let total = Number(purchase.total)
+  let PSTtax = Number(purchase.pstTotal);
+  let GSTtax = Number(purchase.gstTotal);
   const router = useRouter()
 
-  // SendRescipts();
-  const PSTtax = Number(Number(totalAmount * 5 / 100).toFixed(2));
-  const GSTtax = Number(Number(totalAmount * 7 / 100).toFixed(2));
-  const EveryAmount = Number(totalAmount + PSTtax + GSTtax).toFixed(2);
+
+  let finalSale = [];
+
+  for(const items of purchase.items) {
+    finalSale.push(items);
+  }
+
 
 
 
@@ -132,7 +93,7 @@ export default function Home() {
             <ul className="grid gap-3">
               <li className="flex items-center justify-between">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span>${totalAmount.toFixed(2)}</span>
+                <span>${totalBeforeTax.toFixed(2)}</span>
               </li>
               <li className="flex items-center justify-between">
                 <span className="text-muted-foreground">GST Tax</span>
@@ -148,7 +109,7 @@ export default function Home() {
               </li> */}
               <li className="flex items-center justify-between font-semibold">
                 <span className="text-muted-foreground">Total</span>
-                <span>${(EveryAmount)}</span>
+                <span>${(total).toFixed(2)}</span>
               </li>
             </ul>
           </div>
@@ -207,38 +168,24 @@ export default function Home() {
 
         </CardContent>
         <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3">
-          <Button variant="outline" onClick={() => router.push('/QRcode')}> Go Back</Button>
+          {/* <Button variant="outline" onClick={() => router.push('/QRcode')}> Go Back</Button> */}
           <Pagination className="ml-auto mr-0 w-auto">
             <PaginationContent>
               <PaginationItem>
                 <AlertDialog>
-                  <AlertDialogTrigger><Button>Send Receipt</Button></AlertDialogTrigger>
+                  <AlertDialogTrigger><Button>Go back to Dashboard</Button></AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        This action cannot be undone. This action will send your receipt to the server with the given account.
+                        This action cannot be undone. If you need to come back to retrieve receipts, you would need to scan both QR codes again!
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction>
                         <Button onClick={() => {
-                          let Purchase = {};
-                          Purchase['items'] = finalSale;
-                          Purchase['userID'] = sessionStorage.getItem('userID');
-                          Purchase['merchantID'] = 12;
-                          Purchase['total'] = EveryAmount;
-                          Purchase['totalTax'] = PSTtax + GSTtax;
-                          Purchase['totalBeforeTax'] = totalAmount.toFixed(2);
-                          Purchase['tax'] = 5;
-                          Purchase['OrderID'] = orderID;
-                          Purchase['time'] = formattedDate;
-                          Purchase['merchantName'] = "CyberSecure Bistro";
-                          Purchase['gstTotal'] = GSTtax;
-                          Purchase['pstTotal'] = PSTtax;
-                          sessionStorage.setItem('purchase', JSON.stringify(Purchase));
-                          router.push('/Confirmation')
+                          router.push('/Dashboard')
                         }}> Confirm</Button>
                       </AlertDialogAction>
                     </AlertDialogFooter>

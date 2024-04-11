@@ -65,6 +65,8 @@ function MyComponent() {
         fetch(sendUrl, requestOptions)
             .then(response => {
                 if (!response.ok) {
+                    setF(true);
+                    setData('hello');
                     throw new Error('Network response was not ok');
                 }
                 return response.json();

@@ -11,7 +11,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import db, DigiReceiptUser, Transaction
 from sqlalchemy.exc import OperationalError
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 
 from Crypto.Random import get_random_bytes
 from Crypto.Cipher import AES
@@ -36,7 +36,6 @@ NONCE = b'noncenoncenoncen'
 
 # Configure Flask app with PostgreSQL database - import table schemas from model file
 app = Flask(__name__)
-CORS(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = DB_URL
 app.config["JWT_SECRET_KEY"] = JWT_SECRET_KEY
 jwt = JWTManager(app)
@@ -62,6 +61,8 @@ def _refreshUserKey(user, db):
 def _setTransExpiry(trans, db):
     trans.expiry_time = int(time.time()) + EXPIRY_TIME
     db.session.commit()
+
+CORS(app)
 
 # BACKEND ROUTES START HERE
 @app.route('/',methods=['GET'])
@@ -170,6 +171,7 @@ def getUserReceipt():
 
 
 @app.route('/sendreceipt', methods=['POST'])
+@cross_origin()
 def sendRecipt():
     data = request.json
     cid = data.get('cid')
@@ -190,33 +192,40 @@ def sendRecipt():
         return jsonify({'error': 'Incorrect user ID'}), 404
 
 @app.route('/validatereceipt', methods=['POST'])
+@cross_origin()
 def validate():
-    cid = request.json.get("cid", None)
-    #tid = request.json.get("tid", None)
-    qrdata = request.json.get("qrdata", None)
-    print(f"QRdata from request: {qrdata}")
+    try:
+        cid = request.json.get("cid", None)
+        #tid = request.json.get("tid", None)
+        qrdata = request.json.get("qrdata", None)
+        print(f"QRdata from request: {qrdata}")
 
-    user = session.query(DigiReceiptUser).filter_by(id=cid).first()
-    if not user:
-        return jsonify({"error": "User not found"}), 404
+        user = session.query(DigiReceiptUser).filter_by(id=cid).first()
+        if not user:
+            return jsonify({"error": "User not found"}), 404
 
-    cipher = AES.new(key=user.private_key, mode=AES.MODE_GCM, nonce=NONCE, mac_len=KEY_LENGTH)
-    print(f"Key used for decryption: {user.private_key}")
+        cipher = AES.new(key=user.private_key, mode=AES.MODE_GCM, nonce=NONCE, mac_len=KEY_LENGTH)
+        print(f"Key used for decryption: {user.private_key}")
 
-    print(f"Encrypted TID: {bytes.fromhex(qrdata)}")
-    user_tid = cipher.decrypt(bytes.fromhex(qrdata))
-    print(f"Transaction ID after decryption: {user_tid}")
+        print(f"Encrypted TID: {bytes.fromhex(qrdata)}")
+        user_tid = cipher.decrypt(bytes.fromhex(qrdata))
+        print(f"Transaction ID after decryption: {user_tid}")
 
-    transaction = session.query(Transaction).filter_by(tid=user_tid.decode('utf-8')).first()
+        transaction = session.query(Transaction).filter_by(tid=user_tid.decode('utf-8')).first()
 
-    if transaction:
-        if transaction.expiry_time < int(time.time()):
-            return jsonify({"error": "Potential Receipt Fraud (QR Expired)"}), 403
+        if transaction:
+            if transaction.expiry_time < int(time.time()):
+                print("Send 403_1")
+                return jsonify({"error": "Potential Receipt Fraud (QR Expired)"}), 403
+            else:
+                print("Send 200")
+                return jsonify({"id": transaction.id, "time": transaction.time, "purchases": transaction.purchases}), 200
         else:
-            return jsonify({"id": transaction.id, "time": transaction.time, "purchases": transaction.purchases}), 200
-    else:
-        return jsonify({"error": "Potential Receipt Fraud (Invalid transaction ID)"}), 403
-
+            print("Send 403_2")
+            return jsonify({"error": "Potential Receipt Fraud (Invalid transaction ID)"}), 403
+    except:
+        print("Send 404")
+        return jsonify({"error": "Server error"}), 404
 
 # @app.route('/remove-receipts', methods=['POST'])
 # Used for debugging

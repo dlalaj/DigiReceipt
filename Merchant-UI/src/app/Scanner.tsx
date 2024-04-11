@@ -75,7 +75,7 @@ const Scanner = ({name}) => {
           scanning = false;
           setIsDisabled(false);
           console.log('QR Code detected:', code.data);
-          resultElement12.innerText = 'QR Code detected: ' + code.data;
+          resultElement12.innerText = 'QR Code detected';
           let varName = name + "ID";
           console.log(varName);
           sessionStorage.setItem(varName, code.data);
