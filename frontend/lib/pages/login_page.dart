@@ -20,10 +20,10 @@ class _LoginPageState extends State<LoginPage> {
 
     final username = usernameController.text;
     final password = passwordController.text;
-    final authApi = AuthApi(baseUrl: 'https://10.0.2.2:5000');
+    final authApi = AuthApi(baseUrl: 'https://4.206.218.68:5000');
 
     final result = await authApi.signIn(username, password);
-
+    print("ERROR LOGIN");
     if (result == null) {
       // Display message to indicate that username is taken
       showDialog(
@@ -88,7 +88,8 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => NavigatorPage()),
-        (Route<dynamic> route) => false, // Remove all routes below the NavigatorPage
+        (Route<dynamic> route) =>
+            false, // Remove all routes below the NavigatorPage
       );
     }
   }
@@ -174,7 +175,7 @@ class _SignUpPageState extends State<SignUpPage> {
     // Call signIn method
     final username = usernameController.text;
     final password = passwordController.text;
-    final authApi = AuthApi(baseUrl: 'https://10.0.2.2:5000');
+    final authApi = AuthApi(baseUrl: 'https://4.206.218.68:5000');
 
     final result = await authApi.signUp(username, password);
     if (result == null) {

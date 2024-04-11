@@ -21,7 +21,11 @@ class _ReceiptsViewState extends fca.ViewState<ReceiptsView, ReceiptsController>
       body: fca.ControlledWidgetBuilder<ReceiptsController>(
         builder: (context, controller) {
           // Update StreamBuilder to work with List<Receipt>
-          return StreamBuilder<List<Receipt>>(
+          return RefreshIndicator(
+            onRefresh: () async {
+              controller.reloadReceipts();
+            },
+            child: StreamBuilder<List<Receipt>>(
             stream: controller.receiptsStream,
             builder: (context, snapshot) {
               if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -54,6 +58,7 @@ class _ReceiptsViewState extends fca.ViewState<ReceiptsView, ReceiptsController>
                 },
               );
             },
+           )
           );
         },
       ),

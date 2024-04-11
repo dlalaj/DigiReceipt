@@ -5,7 +5,7 @@ import 'package:flutter_clean_architecture/flutter_clean_architecture.dart';
 class ReceiptsController extends Controller {
   final StreamController<List<Receipt>> _receiptsController =
       StreamController<List<Receipt>>.broadcast();
-  final AuthApi _authApi = AuthApi(baseUrl: 'http://10.0.2.2:5000');
+  final AuthApi _authApi = AuthApi(baseUrl: 'https://4.206.218.68:5000');
 
   Stream<List<Receipt>> get receiptsStream => _receiptsController.stream;
 
@@ -25,6 +25,9 @@ class ReceiptsController extends Controller {
     }
   }
 
+  void reloadReceipts() async {
+    _loadReceipts();
+  }
   @override
   void initListeners() {
     // Your existing listener initialization
@@ -32,8 +35,8 @@ class ReceiptsController extends Controller {
 }
 
 class Receipt {
-  final int cid;
-  final int mid;
+  final String cid;
+  final String mid;
   final String time;
   final String qrData;
   final PurchaseDetails purchases;
@@ -50,7 +53,7 @@ class Receipt {
     return Receipt(
       cid: json['cid'],
       mid: json['mid'],
-      qrData: json['qrData'],
+      qrData: json['qrdata'],
       time: json['time'],
       purchases: PurchaseDetails.fromJson(json['purchases']),
     );
@@ -83,11 +86,11 @@ class PurchaseDetails {
     return PurchaseDetails(
       merchantName: json['merchantName'],
       items: itemsList,
-      totalBeforeTax: json['totalBeforeTax'],
-      gstTotal: json['gstTotal'],
-      pstTotal: json['pstTotal'],
-      totalTax: json['totalTax'],
-      total: json['total'],
+      totalBeforeTax: json['totalBeforeTax']/1.0,
+      gstTotal: json['gstTotal']/1.0,
+      pstTotal: json['pstTotal']/1.0,
+      totalTax: json['totalTax']/1.0,
+      total: json['total']/1.0,
     );
   }
 }
@@ -109,7 +112,7 @@ class Item {
     return Item(
         name: json['name'],
         price: json['price'],
-        quantity: json['totalNumber'],
+        quantity: json['quantity'],
         totalPrice: json['totalPrice']);
   }
 }

@@ -45,7 +45,7 @@ class AuthApi {
       // Store token, user ID, and username
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', responseData['token']);
-      await prefs.setInt('userId', responseData['userId']);
+      await prefs.setString('userId', responseData['cid']);
       await prefs.setString('username', username);
 
       return json.decode(response.body);
@@ -90,9 +90,9 @@ class AuthApi {
 }
 
 class UserPreferences {
-  static Future<int?> getUserId() async {
+  static Future<String?> getUserId() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt('userId');
+    return prefs.getString('userId');
   }
 
   static Future<String?> getToken() async {
