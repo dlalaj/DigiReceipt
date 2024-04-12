@@ -161,7 +161,9 @@ const ScannerPage1 = () => {
                     </DrawerFooter>
                   </DrawerContent>
                 </Drawer>
-                <Button disabled={disabled}> Retrieve Receipt</Button>
+                <Button disabled={disabled} onClick={() => {
+                  router.push('/RetrieveReceipts?retrieveReceipts=1')
+                }}> Retrieve Receipt</Button>
 
               </CardFooter>
             </Card>

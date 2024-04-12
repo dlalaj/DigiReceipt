@@ -12,6 +12,11 @@ rm package-lock.json
 npm cache clear --force
 npm install
 
+```
+
+To make the serve to accpet the HTTPS POST request on invalid SSL certificates, just run this command 
+```open -a "Google Chrome" --args --ignore-certificate-errors --unsafely-treat-insecure-origin-as-secure=https://127.0.0.1:5000```
+
 ```x
 Then, run the development server:
 ```bash
