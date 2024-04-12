@@ -68,6 +68,8 @@ function MyComponent() {
                     // @ts-ignore
                     setData('hello');
                     setF(true);
+                    sessionStorage.clear();
+                    localStorage.clear();
                     throw new Error("Did not work!")
                 }
                 return response.json();
