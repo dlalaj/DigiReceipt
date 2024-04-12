@@ -140,10 +140,14 @@ def getUserReceipt():
 
     serialized_transactions = []
     user = session.query(DigiReceiptUser).filter_by(id=user_cid).first()
+
+    if not user:
+        return jsonify({'error': f'No user with cid: {user_cid}'}), 500
+
     transactions = Transaction.query.with_entities(Transaction).filter(Transaction.cid == user_cid).all()
 
     if not transactions:
-        return jsonify({'error': f'No client with cid: {user_cid}'}), 500
+        return jsonify({'error': f'No transactions for user with cid: {user_cid}'}), 500
     
     print(f"Key before refresh: {user.private_key}")
     _refreshUserKey(user, db)

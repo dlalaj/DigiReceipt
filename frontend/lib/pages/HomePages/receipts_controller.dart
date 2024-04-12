@@ -14,6 +14,7 @@ class ReceiptsController extends Controller {
   }
 
   void _loadReceipts() async {
+    print("ATTEMPTING TO FETCH RECEIPTS");
     var jsonResponse = await _authApi.fetchReceipts();
     if (jsonResponse != null) {
       List<Receipt> receipts = List<Receipt>.from(
@@ -112,7 +113,7 @@ class Item {
     return Item(
         name: json['name'],
         price: json['price'],
-        quantity: json['quantity'],
+        quantity: json['totalNumber'],
         totalPrice: json['totalPrice']);
   }
 }
