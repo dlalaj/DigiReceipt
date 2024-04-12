@@ -124,8 +124,11 @@ function MyComponent() {
                         <div className='container3'>
                             <br /> <br /> <br /> <br /> <br />  <br /> <br /> <br /> <br /> <br /> <br /> <br />
                             <h3 className="text-2xl font-bold tracking-tight">
-                                Transcation falied, try again!
+                                Receipt retrieval failed! Please try again!
                             </h3>
+                            <p className="text-sm text-muted-foreground">
+                            Exercise caution, as this receipt may be associated with fraudulent activity
+                            </p>
 
                         </div>
 

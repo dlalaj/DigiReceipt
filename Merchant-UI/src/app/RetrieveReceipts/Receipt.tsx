@@ -32,7 +32,7 @@ import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/p
 let onetime = 0;
 export default function Home12({purchase}) {
   let obj = purchase;
-  purchase = JSON.parse(obj.purchases);
+  purchase = (obj.purchases);
   console.log(purchase);
   let orderID = purchase.OrderID;
   let formattedDate = obj.time;

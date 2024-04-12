@@ -228,15 +228,14 @@ export default function Home() {
                           Purchase['items'] = finalSale;
                           Purchase['userID'] = sessionStorage.getItem('userID');
                           Purchase['merchantID'] = 12;
-                          Purchase['total'] = EveryAmount;
-                          Purchase['totalTax'] = PSTtax + GSTtax;
-                          Purchase['totalBeforeTax'] = totalAmount.toFixed(2);
-                          Purchase['tax'] = 5;
+                          Purchase['total'] = Number(EveryAmount);
+                          Purchase['totalTax'] = Number(PSTtax + GSTtax);
+                          Purchase['totalBeforeTax'] = Number(totalAmount.toFixed(2));
                           Purchase['OrderID'] = orderID;
                           Purchase['time'] = formattedDate;
                           Purchase['merchantName'] = "CyberSecure Bistro";
-                          Purchase['gstTotal'] = GSTtax;
-                          Purchase['pstTotal'] = PSTtax;
+                          Purchase['gstTotal'] = Number(GSTtax);
+                          Purchase['pstTotal'] = Number(PSTtax);
                           sessionStorage.setItem('purchase', JSON.stringify(Purchase));
                           router.push('/Confirmation')
                         }}> Confirm</Button>
