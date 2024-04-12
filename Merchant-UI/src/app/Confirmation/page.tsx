@@ -44,7 +44,8 @@ function MyComponent() {
 
 
     function sendReceipts(userID: string, finalSale: any, currentTime: string) {
-        const sendUrl = 'https://127.0.0.1:5000/sendreceipt';
+        const sendUrl = 'https://4.206.218.68:5000/sendreceipt';
+        
         const data = {
             cid: Number(userID),
             mid: 12,
@@ -66,6 +67,7 @@ function MyComponent() {
             .then(response => {
                 if (!response.ok) {
                     setF(true);
+                     // @ts-ignore
                     setData('hello');
                     throw new Error('Network response was not ok');
                 }

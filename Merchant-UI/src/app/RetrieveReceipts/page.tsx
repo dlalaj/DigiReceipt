@@ -45,7 +45,7 @@ function MyComponent() {
 
 
     function sendReceipts(userID: string, ReceiptID: string) {
-        const sendUrl = 'https://127.0.0.1:5000/validatereceipt';
+        const sendUrl = 'https://4.206.218.68:5000/validatereceipt';
         const data = {
             cid: userID,
             qrdata: ReceiptID
