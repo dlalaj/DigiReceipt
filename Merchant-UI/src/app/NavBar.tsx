@@ -35,7 +35,7 @@ const Navbar = () => {
   if (isMerchant) {
     return (
       <div>
-        <br /> <br /> <br /> <br /> <br /> <br />
+        <br /> <br /> <br /> <br /> 
       </div>);
   }
 

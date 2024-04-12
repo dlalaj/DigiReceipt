@@ -2,6 +2,7 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { useState, useEffect } from 'react';
 import './style.css';
+import Home12 from './Receipt';
 
 function MyComponent() {
     const [data, setData] = useState(null);
@@ -12,28 +13,28 @@ function MyComponent() {
         // Function to fetch data
         async function fetchData() {
             try {
-                const finalSale = sessionStorage.getItem('purchase');
-                const userID = sessionStorage.getItem('userID');
+                const ReceiptID = sessionStorage.getItem('ReceiptID');
+                const userID = sessionStorage.getItem('UserID');
 
-                if (!userID || !finalSale) {
+                if (!userID || !ReceiptID) {
                     // @ts-ignore
                     setData('hello');
                     setF(true);
                     return;
                 }
 
-                const parsedFinalSale = JSON.parse(finalSale);
-                const currentTime = getCurrentTime();
+
 
                 setTimeout(() => {
                     if (onetime === 0) {
-                        sendReceipts(userID, parsedFinalSale, currentTime);
-                        // setData("hello");
                         onetime++;
+                        sendReceipts(userID, ReceiptID);
+                        // setData("hello");
+
 
                     }
 
-                }, 1000);
+                }, 3000);
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -43,18 +44,17 @@ function MyComponent() {
     }, []);
 
 
-    function sendReceipts(userID: string, finalSale: any, currentTime: string) {
-        const sendUrl = 'http://localhost:5000/sendreceipt';
+    function sendReceipts(userID: string, ReceiptID: string) {
+        const sendUrl = 'https://4.206.218.68:5000/validatereceipt';
         const data = {
-            cid: Number(userID),
-            mid: 12,
-            time: currentTime,
-            purchases: JSON.stringify(finalSale)
+            cid: userID,
+            qrdata: ReceiptID
         };
 
         const requestOptions = {
 
             method: 'POST',
+            // mode: 'no-cors',
             headers: {
                 'Content-Type': 'application/json',
 
@@ -65,7 +65,10 @@ function MyComponent() {
         fetch(sendUrl, requestOptions)
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    // @ts-ignore
+                    setData('hello');
+                    setF(true);
+                    throw new Error("Did not work!")
                 }
                 return response.json();
             })
@@ -77,6 +80,7 @@ function MyComponent() {
 
             })
             .catch(error => {
+                setF(true);
                 console.error('There was a problem with the fetch operation:', error);
             });
 
@@ -85,21 +89,23 @@ function MyComponent() {
 
     return (
         <div>
-            <br /> <br /> <br /> <br /> <br />  <br /> <br /> <br /> <br /> <br /> <br /> <br />
-            <div className='container3'>
-                {/* <h3 className="text-2xl font-bold tracking-tight">
+
+            {/* <div className='container3'> */}
+            {/* <h3 className="text-2xl font-bold tracking-tight">
                             Your Receipt has been send to your account
                         </h3>
                         <br />
                         <p className="text-sm text-muted-foreground">
                             You can view your exisiting Receipts on the app!
                         </p> */}
-            </div>
+            {/* </div> */}
 
             {!data ? (
 
 
+
                 <div className="container3">
+                    <br /> <br /> <br /> <br /> <br />  <br /> <br /> <br /> <br /> <br /> <br /> <br />
 
                     <div className="flex items-center space-x-4">
                         <Skeleton className="h-12 w-12 rounded-full" />
@@ -114,25 +120,20 @@ function MyComponent() {
             )
 
                 : (
-                    fail ? 
-                    <div className='container3'>
-                                          <h3 className="text-2xl font-bold tracking-tight">
-                                          Transcation falied, try again!
-                        </h3>
-                        
-                    </div>
+                    fail ?
+                        <div className='container3'>
+                            <br /> <br /> <br /> <br /> <br />  <br /> <br /> <br /> <br /> <br /> <br /> <br />
+                            <h3 className="text-2xl font-bold tracking-tight">
+                                Transcation falied, try again!
+                            </h3>
 
-                    :
-                    <div className='container3'>
+                        </div>
 
-                        <h3 className="text-2xl font-bold tracking-tight">
-                            Your Receipt has been send to your account
-                        </h3>
-                        <br />
-                        <p className="text-sm text-muted-foreground">
-                            You can view your exisiting Receipts on the app!
-                        </p>
-                    </div>
+                        :
+
+
+                        <Home12 purchase={data}></Home12>
+
 
                 )}
 
