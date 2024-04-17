@@ -1,6 +1,22 @@
 # DigiReceipt
 A project built for the 400 level Cybersecurity course (CPEN 442) at UBC
 
+# Design Project
+
+This project won the award of "Best Design Project" among 4th years bestowed by Konstantin Beznosov, a UBC Computer Engineering Professor. 
+
+Outline of this project can be found in a Youtube Video [here](https://www.youtube.com/watch?v=yRzMnziT6js), which was submitted to the mini conference occurring at UBC to showcase our project and presentation to various jury members.
+
+Link to the mini conference - [here](https://blogs.ubc.ca/cpen442/mini-conference/schedule/)
+
+
+# Reasoning behind this project 
+Management of receipts is an issue faced by most people these days as they try to navigate the inconvenience of piles of paper copies and the concern of providing email addresses for digital copies. Furthermore, most formats in which receipts are issued do not account for the risks associated with receipt fraud which can significantly damage the revenue of merchants. DigiReceipt is a digital system designed to serve two purposes. On one end it provides strong privacy guarantees as it does not require any user information such as email or phone number to track digital copies of purchases. On the other end, it is built so as to avoid receipt fraud based on refreshing and encrypted QR codes. 
+
+## For More Information
+
+If you would like to know more regarding this project and how cyber security solutions were implemented to overcome this challenge described above, follow the link [here](https://drive.google.com/file/d/1htzXISls0iod9ojlBo3Omlw58cwUJszf/view?usp=share_link).
+
 ## Frontend Setup
 Follow the installation instructions [here](https://flutter.dev/?gad_source=1&gclid=Cj0KCQjw2a6wBhCVARIsABPeH1vYbEcEqSg32x7elmsDfcpha2lXGbhK-wa9UCYa9u3dh7X8fG5hbQ0aApkFEALw_wcB&gclsrc=aw.ds) to get the Flutter SDK and Dart installed on your machine and ensure you also have a simulator available. By default you should be able to run the app on Chrome but you can also look into getting an iOS or Android simulator.
 
